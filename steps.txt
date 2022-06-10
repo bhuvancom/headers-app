@@ -1,0 +1,59 @@
+script to install node on server
+
+sudo yum update
+sudo curl --silent --location https://rpm.nodesource.com/setup_16.x | bash -
+sudo yum -y install nodejs
+sudo yum install git
+sudo npm install -g pm2
+git clone https://github.com/bhuvancom/headers-app.git
+cd headers-app
+npm i
+pm2 start script/index.js --name headers-app
+pm2 startup
+pm2 save
+sudo amazon-linux-extras install nginx1
+sudo systemctl enable nginx
+sudo systemctl start nginx
+
+vi /etc/nginx/nginx.conf
+-- add
+
+location / {
+       proxy_pass http://127.0.0.1:3000;
+   }
+
+-- in ssl
+
+upstream server {
+  server 127.0.0.1:3000;
+}
+server {
+listen              443 ssl default_server;
+listen              [::]:443 ssl default_server;
+server_name  localhost;
+ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
+ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+ 
+ location / {
+  proxy_pass http://server;
+  proxy_set_header Upgrade $http_upgrade;
+  proxy_set_header Connection "Upgrade";
+  proxy_set_header Host            $host;
+  proxy_set_header X-Real-IP       $proxy_protocol_addr;
+  proxy_set_header X-Forwarded-For $proxy_protocol_addr;
+  # Very important, controls proxied websocket connection timeout
+  proxy_read_timeout 600s;
+ }
+}
+
+sudo mkdir /etc/ssl/private
+sudo chmod 700 /etc/ssl/private
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt
+service nginx configtest
+sudo nginx -t
+
+sudo service nginx restart
+sudo chkconfig nginx on
+
+pm2 start app/script/index.js
+sudo systemctl restart nginx
