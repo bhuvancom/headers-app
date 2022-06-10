@@ -3,7 +3,7 @@ const app = express();
 
 app.get('/headers', function(req, res){
     const headers = req.headers;
-    res.send(header);
+    res.send(headers);
 });
 
 const PORT = 3000;
