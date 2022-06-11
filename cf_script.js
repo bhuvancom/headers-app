@@ -16,8 +16,10 @@ async function doRedirects(request) {
         }
     }
   
-  let reqUA = request.headers.get('user-agent')
-  if (reqUA && reqUA.matches('curl').true) {
+  let reqUA = request.headers.get('user-agent');
+  let curlPatter =  /curl/;
+  curlPatter.test(reqUA)
+  if (reqUA && curlPatter.test(reqUA)) {
       let newLocation = "https://"+newLocationHost
       return Response.redirect(newLocation, 302)
   }
