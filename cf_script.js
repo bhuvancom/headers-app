@@ -4,7 +4,7 @@ addEventListener("fetch", event => {
 
 const newLocationHost = "developers.cloudflare.com/workers/about";
 async function doRedirects(request) {
- const { headers: { cookie } } = req;
+ const { headers: { cookie } } = request;
     if (cookie) {
         const values = cookie.split(';').reduce((res, item) => {
             const data = item.trim().split('=');
@@ -16,8 +16,8 @@ async function doRedirects(request) {
         }
     }
   
-  let reqUA = req.headers.get('user-agent')
-  if (reqUA.matches('curl').true) {
+  let reqUA = request.headers.get('user-agent')
+  if (reqUA && reqUA.matches('curl').true) {
       let newLocation = "https://"+newLocationHost
       return Response.redirect(newLocation, 302)
   }
