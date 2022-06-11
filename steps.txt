@@ -1,5 +1,6 @@
 script to install node on server
 
+sudo su
 sudo yum update
 sudo curl --silent --location https://rpm.nodesource.com/setup_16.x | bash -
 sudo yum -y install nodejs
@@ -30,9 +31,10 @@ upstream server {
 server {
 listen              443 ssl default_server;
 listen              [::]:443 ssl default_server;
+ssl on;
 server_name  localhost;
-ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
-ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+ssl_certificate /etc/ssl/certs/ssl_cert.crt;
+ssl_certificate_key /etc/ssl/private/ssl_key.key;
  
  location / {
   proxy_pass http://server;
@@ -48,12 +50,56 @@ ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
 
 sudo mkdir /etc/ssl/private
 sudo chmod 700 /etc/ssl/private
-sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt
-service nginx configtest
+touch ssl_key.key
+touch /etc/ssl/certs/ssl_cert.pem
+chmod 400 ssl_cert.cert
 sudo nginx -t
 
 sudo service nginx restart
 sudo chkconfig nginx on
 
-pm2 start app/script/index.js
+pm2 start /home/ec2-user/headers-app/index.js
 sudo systemctl restart nginx
+
+
+
+curl -X GET "https://api.cloudflare.com/client/v4/zones/:zone_identifier/dns_records" -H "X-Auth-Email: bhuvaneshvar4@gamil.com" -H "Authorization: Bearer R6lOb-CGsF3_TkJSz7hF4SluK6Oldw-V0YmuMmXZ" -H "Content-Type: application/json"
+
+
+
+enable worked -
+ goto worker, create worked with template, then change code with your code, test with diff params.
+
+
+ download cloud flared in ec2
+ wget https://github.com/cloudflare/cloudflared/releases/download/2022.5.3/cloudflared-fips-linux-x86_64.rpm
+ sudo yum localinstall file_name
+
+
+ cloudflared tunnel login
+ cloudflared --hostname shristij.com http://localhost:3000
+ open link in new tab
+
+
+ cloudflared tunnel create tunnel
+ cloudflared tunnel route ip add 172.31.0.0/16 tunnel
+ 
+ sudo mkdir /etc/cloudflared
+ touch config.yml
+ vim config.yml
+
+tunnel: 9a259e14-f452-49d9-9186-0bcf6fc50b8b --change
+credentials-file: /home/ec2-user/.cloudflared/9a259e14-f452-49d9-9186-0bcf6fc50b8b.json --change
+ingress:
+  - hostname: tunnel.shristij.com
+    service: http://localhost:3000
+protocol: quic
+warp-routing:
+   enabled: true
+logfile: /var/log/cloudflared.log
+#cloudflared to the origin debug
+loglevel: debug
+#cloudflared to cloudflare debug
+transport-loglevel: info
+
+cloudflared tunnel  --origincert /home/ec2-user/.cloudflared/cert.pem  -config config.yml run tunnel
