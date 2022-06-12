@@ -18,12 +18,7 @@ app.get('/headers', function(req, res){
     res.send(headers);
  });
 app.get('/secure',function(req,res){
-    if(req.headers.user && req.header.user == 'AKASH'){
-        const headers = req.headers;
-        res.send(headers);
-    } else {
-        res.status(403).send('{"msg":"You are not authorized to view this page"}');
-    }
+        res.send('{"msg":"You are authorized by cloudflare to see this page."}');
 });
 
  function getcookie(req) {
