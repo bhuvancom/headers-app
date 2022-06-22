@@ -1,20 +1,11 @@
 const express = require('express');
 const app = express();
 
+app.get("/",function(req,res){
+    res.send("It's working");
+});
 app.get('/headers', function(req, res){
     const headers = req.headers;
-    // const { headers: { cookie } } = req;
-    // if (cookie) {
-    //     const values = cookie.split(';').reduce((res, item) => {
-    //         const data = item.trim().split('=');
-    //         return { ...res, [data[0]]: data[1] };
-    //     }, {});
-    //     console.log(values);
-    //     if(values['username-localhost-8888']){
-    //         console.log('it should bypass');
-    //     }
-    // }
-
     res.send(headers);
  });
 app.get('/secure',function(req,res){
